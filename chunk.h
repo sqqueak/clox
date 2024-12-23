@@ -2,21 +2,26 @@
 #define clox_chunk_h
 
 #include "common.h"
+#include "value.h"
 
-/// @brief Specifies the possible instructions (opcodes) we can have.
+// possible operations, each one byte in size
 typedef enum {
+  OP_CONSTANT,
   OP_RETURN,
 } OpCode;
 
-/// @brief Represents a dynamic array.
+// dynamic array storing sequences of bytecode
 typedef struct {
-  int count;      // Total elements stored in the array
-  int capacity;   // Maximum number of elements that can be stored
-  uint8_t* code;  // Pointer to array that stores the values
+  int count;
+  int capacity;
+  uint8_t* code;
+  int* lines;
+  ValueArray constants;
 } Chunk;
 
 void initChunk(Chunk* chunk);
 void freeChunk(Chunk* chunk);
-void writeChunk(Chunk* chunk, uint8_t byte);
+void writeChunk(Chunk* chunk, uint8_t byte, int line);
+int addConstant(Chunk* chunk, Value value);
 
 #endif

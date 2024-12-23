@@ -3,16 +3,16 @@
 
 #include "common.h"
 
-// Calculates a new capacity given current capacity
+// double capacity if currently larger than 8, otherwise set to 8
 #define GROW_CAPACITY(capacity) \
   ((capacity) < 8 ? 8 : (capacity) * 2)
 
-// Creates new array and moves pointer to point at new array
+// resize array from old count size to new count size
 #define GROW_ARRAY(type, pointer, oldCount, newCount) \
   (type*)reallocate(pointer, sizeof(type) * (oldCount), \
     sizeof(type) * (newCount))
 
-// Frees array by allocating array to size 0
+// frees array allocating it to be size 0
 #define FREE_ARRAY(type, pointer, oldCount) \
   reallocate(pointer, sizeof(type) * (oldCount), 0)
 

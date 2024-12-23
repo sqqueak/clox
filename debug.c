@@ -1,43 +1,52 @@
 #include <stdio.h>
 
 #include "debug.h"
+#include "value.h"
 
-/// @brief Prints each instruction in a Chunk.
-/// @param chunk Chunk to be disassembled
-/// @param name Name of Chunk
+// displays each instruction in a chunk
 void disassembleChunk(Chunk* chunk, const char* name) {
-	// Header denoting which Chunk is being looked at
-	printf("== %s ==\n", name);
+  printf("== %s ==\n", name);
 
-	for(int offset = 0; offset < chunk->count;) {
-		// Prints each instruction
-		offset = disassembleInstruction(chunk, offset);
-	}
+  for(int offset = 0; offset < chunk->count;) {
+    offset = disassembleInstruction(chunk, offset);
+  }
 }
 
-/// @brief 
-/// @param name 
-/// @param offset 
-/// @return 
+// displays constant instruction with the constant value
+static int constantInstruction(const char* name, Chunk* chunk, int offset) {
+  uint8_t constant = chunk->code[offset + 1];
+  printf("%-16s %4d '", name, constant);
+  printValue(chunk->constants.values[constant]);
+  printf("'\n");
+  return offset + 2;
+}
+
+// displays a single, one-byte instruction without parameters
 static int simpleInstruction(const char* name, int offset) {
-	printf("%s\n", name);
-	return offset + 1;
+  printf("%s\n", name);
+  return offset + 1;
 }
 
-/// @brief Prints instruction based on which opcode is read.
-/// @param chunk Chunk holding the instruction
-/// @param offset Byte offset of instruction
-/// @return Byte offset for next instruction
+// redirects execution to the correct display function 
 int disassembleInstruction(Chunk* chunk, int offset) {
-	printf("%04d ", offset);
+  printf("%04d ", offset);
 
-	uint8_t instruction = chunk->code[offset];
-	// Branching for each possible opcode
-	switch(instruction) {
-		case OP_RETURN:
-			return simpleInstruction("OP_RETURN", offset);
-		default:
-			printf("Unknown opcode %d\n", instruction);
-			return offset + 1;
-	}
+  // explictly print the instruction line num if it's different than the 
+  // previous one
+  if (offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1]) {
+    printf("   | ");
+  } else {
+    printf("%4d ", chunk->lines[offset]);
+  }
+
+  uint8_t instruction = chunk->code[offset];
+  switch(instruction) {
+    case OP_CONSTANT:
+      return constantInstruction("OP_CONSTANT", chunk, offset);
+    case OP_RETURN:
+      return simpleInstruction("OP_RETURN", offset);
+    default:
+      printf("Unknown opcode %d\n", instruction);
+      return offset + 1;
+  }
 }
