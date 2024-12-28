@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "debug.h"
+#include "compiler.h"
 #include "vm.h"
 
 VM vm;
@@ -81,8 +82,7 @@ static InterpretResult run() {
 }
 
 // executes a chunk line by line
-InterpretResult interpret(Chunk* chunk) {
-  vm.chunk = chunk;
-  vm.ip = vm.chunk->code; // tracking where in the code we are
-  return run();
+InterpretResult interpret(const char* source) {
+  compile(source);
+  return INTERPRET_OK;
 }
