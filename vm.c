@@ -17,11 +17,13 @@ void initVM() {
 void freeVM() {
 }
 
+// pushes a value onto the vm's stack
 void push(Value value) {
   *vm.stackTop = value; // stores value at top of stack
   vm.stackTop++; // advances pointer
 }
 
+// pops a value from the vm's stack
 Value pop() {
   vm.stackTop--;
   return *vm.stackTop;
@@ -30,6 +32,14 @@ Value pop() {
 static InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
+#define BINARY_OP(op) \
+  do { \
+    double b = pop(); \
+    double a = pop(); \
+    push(a op b); \
+  } while (false);
+  // using the do-while loop is to ensure that the macro is bound in the right
+  // scope when executing it and allow a semicolon for compiler checks
 
   // read and execute bytecode instructions one by one
   for(;;) {
@@ -52,6 +62,11 @@ static InterpretResult run() {
         push(constant);
         break;
       }
+      case OP_ADD: BINARY_OP(+); break;
+      case OP_SUBTRACT: BINARY_OP(-); break;
+      case OP_MULTIPLY: BINARY_OP(*); break;
+      case OP_DIVIDE: BINARY_OP(/); break;
+      case OP_NEGATE: push(-pop()); break;
       case OP_RETURN: {
         printValue(pop());
         printf("\n");
@@ -62,8 +77,10 @@ static InterpretResult run() {
 
 #undef READ_BYTE
 #undef READ_CONSTANT
+#undef BINARY_OP
 }
 
+// executes a chunk line by line
 InterpretResult interpret(Chunk* chunk) {
   vm.chunk = chunk;
   vm.ip = vm.chunk->code; // tracking where in the code we are
