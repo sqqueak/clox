@@ -32,5 +32,5 @@ void writeValueArray(ValueArray* array, Value value) {
 
 // prints out a value!
 void printValue(Value value) {
-  printf("%g", value);
+  printf("%g", AS_NUMBER(value));
 }
